@@ -1,4 +1,4 @@
-// ════════════════════════════════════════════════════════════════════════════
+// ----------------------------------------------------------------------------
 //  NativeLessonScreen — مشغل فيديو مستقل
 //
 //  الفكرة: بدلاً من youtube_player_iframe الذي يُنتج origin=null ويسبب
@@ -16,7 +16,7 @@
 //    • يستقبل أحداث: ready / play / pause / ended / time:{n}
 //    • يُشغّل تسجيل الإكمال + التنقل بين الدروس من Flutter
 //    • أزرار تحكم إضافية (السابق/التالي/قائمة الدروس) من Flutter
-// ════════════════════════════════════════════════════════════════════════════
+// ----------------------------------------------------------------------------
 
 import 'dart:async';
 
@@ -34,7 +34,7 @@ import '../../domain/entities/lesson.dart';
 import '../providers/di_providers.dart';
 import '../screens/video_progress_service.dart';
 
-// ════════════════════════════════════════════════════════════════════════════
+// ----------------------------------------------------------------------------
 class NativeLessonScreen extends ConsumerStatefulWidget {
   final Lesson lesson;
   final int courseId;
@@ -133,14 +133,14 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
           children: [
             _buildAppBar(),
 
-            // ── منطقة المشغل ─────────────────────────────────────────────
+            // -- منطقة المشغل ---------------------------------------------
             _PlayerArea(
               key: ValueKey(_current.id),
               lesson: _current,
               onCompleted: _handleCompletion,
             ),
 
-            // ── محتوى نصي (إن وجد وليس فيديو) ───────────────────────────
+            // -- محتوى نصي (إن وجد وليس فيديو) ---------------------------
             if (!_current.hasVideo && _current.content.isNotEmpty)
               Expanded(
                 child: Container(
@@ -170,7 +170,7 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
     );
   }
 
-  // ── App Bar ────────────────────────────────────────────────────────────────
+  // -- App Bar ----------------------------------------------------------------
   Widget _buildAppBar() {
     return Container(
       color: AppPalette.mocha,
@@ -204,7 +204,7 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
     );
   }
 
-  // ── شريط التنقل بين الدروس ────────────────────────────────────────────────
+  // -- شريط التنقل بين الدروس ------------------------------------------------
   Widget _buildNavBar(
       List<Lesson> lessons, int idx, bool hasPrev, bool hasNext) {
     return Container(
@@ -248,7 +248,7 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
     );
   }
 
-  // ── قائمة الدروس ──────────────────────────────────────────────────────────
+  // -- قائمة الدروس ----------------------------------------------------------
   void _showCourseComplete() {
     showDialog(
       context: context,
@@ -322,12 +322,12 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
   }
 }
 
-// ════════════════════════════════════════════════════════════════════════════
+// ----------------------------------------------------------------------------
 //  _PlayerArea
 //  يستخدم WebView لتحميل HTML endpoint الخاص بالإضافة
 //  هذا يضمن أن YouTube يرى origin صحيح (home_url الموقع)
 //  وتعمل نفس آلية Plyr الموجودة في الموقع بالضبط
-// ════════════════════════════════════════════════════════════════════════════
+// ----------------------------------------------------------------------------
 class _PlayerArea extends StatefulWidget {
   final Lesson lesson;
   final VoidCallback onCompleted;
@@ -351,12 +351,12 @@ class _PlayerAreaState extends State<_PlayerArea> {
   }
 
   Future<void> _initWebView() async {
-    // ── جلب الـ JWT token ──────────────────────────────────────────────────
+    // -- جلب الـ JWT token --------------------------------------------------
     final token = await SecureStorageService.instance.getToken() ?? '';
 
     if (!mounted) return;
 
-    // ── تحديد الـ URL ──────────────────────────────────────────────────────
+    // -- تحديد الـ URL ------------------------------------------------------
     // lesson-view endpoint يُرجع HTML Plyr player مع origin صحيح
     // YouTube يقبله لأن origin = home_url() الموقع وليس "null"
     final url = '${ApiConstants.lessonViewUrl(widget.lesson.id)}'
@@ -366,7 +366,7 @@ class _PlayerAreaState extends State<_PlayerArea> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.black)
 
-      // ── استقبال أحداث Plyr من HTML ────────────────────────────────────
+      // -- استقبال أحداث Plyr من HTML ------------------------------------
       // video_player.php يُرسل: ready / play / pause / ended / time:{n} / no_video
       ..addJavaScriptChannel(
         'AppChannel',
@@ -397,7 +397,7 @@ class _PlayerAreaState extends State<_PlayerArea> {
 
       ..loadRequest(Uri.parse(url));
 
-    // ── إعدادات خاصة بـ Android ───────────────────────────────────────────
+    // -- إعدادات خاصة بـ Android -------------------------------------------
     if (ctrl.platform is AndroidWebViewController) {
       final android = ctrl.platform as AndroidWebViewController;
       await android.setMediaPlaybackRequiresUserGesture(false);
@@ -406,7 +406,7 @@ class _PlayerAreaState extends State<_PlayerArea> {
     if (mounted) setState(() => _ctrl = ctrl);
   }
 
-  // ── معالجة أحداث Plyr ─────────────────────────────────────────────────────
+  // -- معالجة أحداث Plyr -----------------------------------------------------
   void _onPlayerEvent(String event) {
     if (!mounted) return;
 
@@ -427,20 +427,13 @@ class _PlayerAreaState extends State<_PlayerArea> {
         widget.onCompleted();
         break;
 
-      // ── Fullscreen: WebView يطلب من Flutter يتولى الدوران ──────
+      // -- Fullscreen: WebView يطلب من Flutter يتولى الدوران ------
       case 'fullscreen:enter':
-        _isFullscreen = true;
-        SystemChrome.setPreferredOrientations([
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight,
-        ]);
-        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        if (!_isFullscreen) _toggleFullscreen();
         break;
 
       case 'fullscreen:exit':
-        _isFullscreen = false;
-        SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        if (_isFullscreen) _toggleFullscreen();
         break;
 
       default:
@@ -481,11 +474,11 @@ class _PlayerAreaState extends State<_PlayerArea> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // ── WebView المشغّل ──────────────────────────────────────────────
+          // -- WebView المشغّل ----------------------------------------------
           if (_ctrl != null)
             Positioned.fill(child: WebViewWidget(controller: _ctrl!)),
 
-          // ── مؤشر التحميل ────────────────────────────────────────────────
+          // -- مؤشر التحميل ------------------------------------------------
           if (_loading)
             Container(
               color: Colors.black,
@@ -497,7 +490,7 @@ class _PlayerAreaState extends State<_PlayerArea> {
               ),
             ),
 
-          // ── رسالة خطأ ───────────────────────────────────────────────────
+          // -- رسالة خطأ ---------------------------------------------------
           if (_error != null && !_loading)
             Container(
               color: Colors.black,
