@@ -1,4 +1,4 @@
-// ════════════════════════════════════════════════════════════════════════════
+/ ════════════════════════════════════════════════════════════════════════════
 //  NativeLessonScreen — مشغل فيديو مستقل
 //
 //  الفكرة: بدلاً من youtube_player_iframe الذي يُنتج origin=null ويسبب
@@ -105,11 +105,27 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final lessons = widget.allLessons;
-    final idx     = lessons.indexWhere((l) => l.id == _current.id);
-    final hasPrev = idx > 0;
-    final hasNext = idx >= 0 && idx + 1 < lessons.length;
+    final lessons     = widget.allLessons;
+    final idx         = lessons.indexWhere((l) => l.id == _current.id);
+    final hasPrev     = idx > 0;
+    final hasNext     = idx >= 0 && idx + 1 < lessons.length;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
+    // في Landscape: المشغّل يملأ الشاشة كاملاً — AppBar وNavBar مخفيان
+    if (isLandscape) {
+      return SecureScreen(
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: _PlayerArea(
+            key: ValueKey(_current.id),
+            lesson: _current,
+            onCompleted: _handleCompletion,
+          ),
+        ),
+      );
+    }
+
+    // في Portrait: التخطيط الاعتيادي
     return SecureScreen(
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -450,19 +466,20 @@ class _PlayerAreaState extends State<_PlayerArea> {
 
   @override
   Widget build(BuildContext context) {
-    final screenW = MediaQuery.of(context).size.width;
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
-    // في وضع landscape: المشغل يملأ كل الشاشة
-    final playerH = isLandscape
-        ? MediaQuery.of(context).size.height
-        : screenW * 9 / 16;
+    // Landscape: يملأ الشاشة كاملاً بدون حساب يدوي للأبعاد
+    // Portrait: نسبة 16:9 بناءً على العرض
+    final size     = MediaQuery.of(context).size;
+    final playerH  = isLandscape ? size.height : size.width * 9 / 16;
+    final playerW  = isLandscape ? size.width  : size.width;
 
     return SizedBox(
-      width: screenW,
+      width:  playerW,
       height: playerH,
       child: Stack(
+        fit: StackFit.expand,
         children: [
           // ── WebView المشغّل ──────────────────────────────────────────────
           if (_ctrl != null)
