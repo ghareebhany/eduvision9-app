@@ -513,24 +513,6 @@ class _PlayerAreaState extends State<_PlayerArea> {
               ),
             ),
 
-          // ── زر ملء الشاشة (portrait فقط) ────────────────────────────────
-          if (!_loading && _error == null && !isLandscape)
-            Positioned(
-              bottom: 8,
-              right: 8,
-              child: GestureDetector(
-                onTap: _toggleFullscreen,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  padding: const EdgeInsets.all(6),
-                  child: const Icon(Icons.fullscreen_rounded,
-                      color: Colors.white, size: 22),
-                ),
-              ),
-            ),
         ],
       ),
     );
