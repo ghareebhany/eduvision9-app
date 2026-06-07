@@ -111,8 +111,8 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
     final hasNext     = idx >= 0 && idx + 1 < lessons.length;
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
-    // في Landscape: المشغّل يملأ الشاشة كاملاً — AppBar وNavBar مخفيان
-    if (isLandscape) {
+    // في Fullscreen أو Landscape: المشغّل يملأ الشاشة كاملاً
+    if (_isFullscreen || isLandscape) {
       return SecureScreen(
         child: Scaffold(
           backgroundColor: Colors.black,
@@ -459,14 +459,14 @@ class _PlayerAreaState extends State<_PlayerArea> {
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    // نعتمد على _isFullscreen (يُحدَّث فوراً بـ setState) بدل Orientation
+    // لأن Orientation يتغير بتأخير بعد SystemChrome.setPreferredOrientations
+    final fillScreen = _isFullscreen || isLandscape;
 
-    // Landscape: يملأ الشاشة كاملاً بدون حساب يدوي للأبعاد
-    // Portrait: نسبة 16:9 بناءً على العرض
-    final size     = MediaQuery.of(context).size;
-    final playerH  = isLandscape ? size.height : size.width * 9 / 16;
-    final playerW  = isLandscape ? size.width  : size.width;
+    final size    = MediaQuery.of(context).size;
+    final playerH = fillScreen ? size.height : size.width * 9 / 16;
+    final playerW = size.width;
 
     return SizedBox(
       width:  playerW,
@@ -529,14 +529,14 @@ class _PlayerAreaState extends State<_PlayerArea> {
   }
 
   void _toggleFullscreen() {
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
-    if (isLandscape) {
-      _isFullscreen = false;
+    if (_isFullscreen) {
+      // خروج من fullscreen
+      setState(() => _isFullscreen = false);
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     } else {
-      _isFullscreen = true;
+      // دخول fullscreen
+      setState(() => _isFullscreen = true);
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
