@@ -54,6 +54,7 @@ class NativeLessonScreen extends ConsumerStatefulWidget {
 class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
   late Lesson _current;
   bool _completionFired = false;
+  bool _isFullscreen    = false;  // يُحدَّث من _PlayerArea عبر onFullscreenChanged
 
   @override
   void initState() {
@@ -120,6 +121,7 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
             key: ValueKey(_current.id),
             lesson: _current,
             onCompleted: _handleCompletion,
+            onFullscreenChanged: (v) => setState(() => _isFullscreen = v),
           ),
         ),
       );
@@ -138,6 +140,7 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
               key: ValueKey(_current.id),
               lesson: _current,
               onCompleted: _handleCompletion,
+              onFullscreenChanged: (v) => setState(() => _isFullscreen = v),
             ),
 
             // -- محتوى نصي (إن وجد وليس فيديو) ---------------------------
@@ -331,8 +334,14 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
 class _PlayerArea extends StatefulWidget {
   final Lesson lesson;
   final VoidCallback onCompleted;
+  final ValueChanged<bool> onFullscreenChanged;
 
-  const _PlayerArea({super.key, required this.lesson, required this.onCompleted});
+  const _PlayerArea({
+    super.key,
+    required this.lesson,
+    required this.onCompleted,
+    required this.onFullscreenChanged,
+  });
 
   @override
   State<_PlayerArea> createState() => _PlayerAreaState();
@@ -532,11 +541,13 @@ class _PlayerAreaState extends State<_PlayerArea> {
     if (_isFullscreen) {
       // خروج من fullscreen
       setState(() => _isFullscreen = false);
+      widget.onFullscreenChanged(false);
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     } else {
       // دخول fullscreen
       setState(() => _isFullscreen = true);
+      widget.onFullscreenChanged(true);
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
