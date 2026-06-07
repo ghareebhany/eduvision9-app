@@ -117,11 +117,17 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
       return SecureScreen(
         child: Scaffold(
           backgroundColor: Colors.black,
-          body: _PlayerArea(
-            key: ValueKey(_current.id),
-            lesson: _current,
-            onCompleted: _handleCompletion,
-            onFullscreenChanged: (v) => setState(() => _isFullscreen = v),
+          // extendBodyBehindAppBar + resizeToAvoidBottomInset = false
+          // يضمن أن الـ body يملأ الشاشة كاملاً بما فيها status bar
+          extendBodyBehindAppBar: true,
+          resizeToAvoidBottomInset: false,
+          body: SizedBox.expand(
+            child: _PlayerArea(
+              key: ValueKey(_current.id),
+              lesson: _current,
+              onCompleted: _handleCompletion,
+              onFullscreenChanged: (v) => setState(() => _isFullscreen = v),
+            ),
           ),
         ),
       );
@@ -469,19 +475,23 @@ class _PlayerAreaState extends State<_PlayerArea> {
   @override
   Widget build(BuildContext context) {
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-    // نعتمد على _isFullscreen (يُحدَّث فوراً بـ setState) بدل Orientation
-    // لأن Orientation يتغير بتأخير بعد SystemChrome.setPreferredOrientations
-    final fillScreen = _isFullscreen || isLandscape;
+    final fillScreen  = _isFullscreen || isLandscape;
 
-    final size    = MediaQuery.of(context).size;
-    final playerH = fillScreen ? size.height : size.width * 9 / 16;
-    final playerW = size.width;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // LayoutBuilder يُعطي المساحة المتاحة الفعلية — لا MediaQuery.size
+        // في fullscreen: parent هو SizedBox.expand → constraints = شاشة كاملة
+        // في portrait:   parent هو Column → constraints.maxWidth فقط
+        final w = constraints.maxWidth;
+        final h = fillScreen
+            ? constraints.maxHeight   // ← المساحة المتاحة فعلاً
+            : w * 9 / 16;
 
-    return SizedBox(
-      width:  playerW,
-      height: playerH,
-      child: Stack(
-        fit: StackFit.expand,
+        return SizedBox(
+          width:  w,
+          height: h,
+          child: Stack(
+            fit: StackFit.expand,
         children: [
           // -- WebView المشغّل ----------------------------------------------
           if (_ctrl != null)
@@ -535,6 +545,8 @@ class _PlayerAreaState extends State<_PlayerArea> {
         ],
       ),
     );
+      }, // LayoutBuilder builder
+    );  // LayoutBuilder
   }
 
   void _toggleFullscreen() {
