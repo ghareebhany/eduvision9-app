@@ -119,6 +119,7 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
           body: _PlayerArea(
             key: ValueKey(_current.id),
             lesson: _current,
+            isFullscreen: true,
             onCompleted: _handleCompletion,
             onFullscreenChanged: (v) => setState(() => _isFullscreen = v),
           ),
@@ -138,6 +139,7 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
             _PlayerArea(
               key: ValueKey(_current.id),
               lesson: _current,
+              isFullscreen: false,
               onCompleted: _handleCompletion,
               onFullscreenChanged: (v) => setState(() => _isFullscreen = v),
             ),
@@ -334,12 +336,14 @@ class _PlayerArea extends StatefulWidget {
   final Lesson lesson;
   final VoidCallback onCompleted;
   final ValueChanged<bool> onFullscreenChanged;
+  final bool isFullscreen;
 
   const _PlayerArea({
     super.key,
     required this.lesson,
     required this.onCompleted,
     required this.onFullscreenChanged,
+    required this.isFullscreen,
   });
 
   @override
@@ -348,8 +352,7 @@ class _PlayerArea extends StatefulWidget {
 
 class _PlayerAreaState extends State<_PlayerArea> {
   WebViewController? _ctrl;
-  bool _loading      = true;
-  bool _isFullscreen = false;
+  bool _loading = true;
   String? _error;
 
   @override
@@ -435,22 +438,21 @@ class _PlayerAreaState extends State<_PlayerArea> {
         widget.onCompleted();
         break;
 
-      // -- Fullscreen -------------------------------------------------------
+      // -- Fullscreen: _PlayerArea يُبلّغ الـ parent فقط ------------------
+      // الـ parent (_NativeLessonScreenState) هو المصدر الوحيد للحالة
       case 'fullscreen:enter':
-        setState(() => _isFullscreen = true);
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
         SystemChrome.setPreferredOrientations([
           DeviceOrientation.landscapeLeft,
           DeviceOrientation.landscapeRight,
         ]);
-        widget.onFullscreenChanged(true);
+        widget.onFullscreenChanged(true);   // ← parent يُعيد build
         break;
 
       case 'fullscreen:exit':
-        setState(() => _isFullscreen = false);
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
         SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-        widget.onFullscreenChanged(false);
+        widget.onFullscreenChanged(false);  // ← parent يُعيد build
         break;
 
       default:
@@ -466,24 +468,19 @@ class _PlayerAreaState extends State<_PlayerArea> {
 
   @override
   void dispose() {
-    if (_isFullscreen) {
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    }
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.of(context);
-    final w  = mq.size.width;
-    final h  = _isFullscreen ? mq.size.height : w * 9 / 16;
-
-    return SizedBox(
-      width:  w,
-      height: h,
-      child: Stack(
-        fit: StackFit.expand,
+    if (widget.isFullscreen) {
+      // SizedBox.expand: لا حسابات — يملأ المساحة المتاحة فعلاً
+      // آمن عبر كل الأجهزة بما فيها Samsung و Xiaomi notch screens
+      return SizedBox.expand(
+        child: Stack(
+          fit: StackFit.expand,
         children: [
           // -- WebView المشغّل ----------------------------------------------
           if (_ctrl != null)
@@ -536,7 +533,30 @@ class _PlayerAreaState extends State<_PlayerArea> {
 
         ],
       ),
-    ); // SizedBox
+    ); // SizedBox.expand fullscreen
+    }
+
+    // Portrait: نسبة 16:9 ثابتة
+    final w = MediaQuery.of(context).size.width;
+    return SizedBox(
+      width:  w,
+      height: w * 9 / 16,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (_ctrl != null)
+            Positioned.fill(child: WebViewWidget(controller: _ctrl!)),
+          if (_loading)
+            const ColoredBox(
+              color: Colors.black,
+              child: Center(
+                child: CircularProgressIndicator(
+                    color: Color(0xFFe52027), strokeWidth: 2.5),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
 }
