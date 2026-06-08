@@ -10,12 +10,12 @@ import '../providers/auth_provider.dart';
 import '../providers/bundles_provider.dart';
 
 // ── Palette shortcuts ─────────────────────────────────────────────────────────
-const _bg     = AppTheme.mocha700;   // 472D30 — scaffold bg
-const _plum   = AppTheme.mocha500;   // 723D46
-const _mocha  = AppTheme.mocha700;   // 472D30
-const _coral  = AppTheme.coral500;   // E26D5C
-const _peach  = AppTheme.peach500;   // FFE1A8
-const _sage   = AppTheme.sage500;    // C9CBA3
+const _bg     = AppTheme.mocha700;
+const _plum   = AppTheme.mocha500;
+const _mocha  = AppTheme.mocha700;
+const _coral  = AppTheme.coral500;
+const _peach  = AppTheme.peach500;
+const _sage   = AppTheme.sage500;
 const _white  = Colors.white;
 
 BoxShadow _sh(double b, {Color c = Colors.black, double o = 0.12}) =>
@@ -89,7 +89,7 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: _bg,
+        backgroundColor: AppTheme.mocha900,
         body: RefreshIndicator(
           color: _coral,
           backgroundColor: _white,
@@ -98,47 +98,40 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
             physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             slivers: [
 
-              // ── Pinned AppBar + search ──────────────────────────────────
+              // ── Hero header ──────────────────────────────────────────
               SliverAppBar(
                 pinned: true,
                 floating: true,
                 snap: true,
-                backgroundColor: _bg,
+                backgroundColor: Colors.transparent,
                 systemOverlayStyle: SystemUiOverlayStyle.light,
-                expandedHeight: 0,
-                title: Row(children: [
-                  const Text('الحزم التعليمية',
-                      style: TextStyle(
-                          color: _white, fontWeight: FontWeight.w800, fontSize: 18)),
-                  const Spacer(),
-                  if (all.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _white.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _sage.withValues(alpha: 0.3)),
-                      ),
-                      child: Text('${all.length} حزمة',
-                          style: TextStyle(
-                              color: _white.withValues(alpha: 0.8),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600)),
-                    ),
-                ]),
+                expandedHeight: 140,
+                flexibleSpace: FlexibleSpaceBar(
+                  collapseMode: CollapseMode.pin,
+                  background: _HeroHeader(count: all.length),
+                ),
                 bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(58),
+                  preferredSize: const Size.fromHeight(60),
                   child: Container(
-                    color: _bg,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppTheme.mocha900.withValues(alpha: 0.0),
+                          AppTheme.mocha900,
+                        ],
+                      ),
+                    ),
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                     child: Row(children: [
                       // Search field
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: _white.withValues(alpha: 0.10),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: _white.withValues(alpha: 0.18)),
+                            color: _white.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: _white.withValues(alpha: 0.15)),
                           ),
                           child: TextField(
                             controller: _searchCtrl,
@@ -147,13 +140,13 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                             decoration: InputDecoration(
                               hintText: 'ابحث عن حزمة...',
                               hintStyle: TextStyle(
-                                  color: _white.withValues(alpha: 0.45), fontSize: 13),
+                                  color: _white.withValues(alpha: 0.4), fontSize: 13),
                               prefixIcon: Icon(Icons.search_rounded,
-                                  color: _white.withValues(alpha: 0.55), size: 20),
+                                  color: _white.withValues(alpha: 0.5), size: 20),
                               suffixIcon: _q.isNotEmpty
                                   ? IconButton(
                                       icon: Icon(Icons.close_rounded,
-                                          color: _white.withValues(alpha: 0.6), size: 18),
+                                          color: _white.withValues(alpha: 0.5), size: 18),
                                       onPressed: () {
                                         _searchCtrl.clear();
                                         setState(() => _q = '');
@@ -166,35 +159,39 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       // Filter button
                       Stack(children: [
                         GestureDetector(
                           onTap: () => _showFilterSheet(context, all, enrolledCount),
                           child: Container(
-                            width: 42, height: 42,
+                            width: 46, height: 46,
                             decoration: BoxDecoration(
-                              color: _hasFilter
-                                  ? _coral.withValues(alpha: 0.25)
-                                  : _white.withValues(alpha: 0.10),
-                              borderRadius: BorderRadius.circular(13),
+                              gradient: _hasFilter
+                                  ? LinearGradient(colors: [_coral, _plum])
+                                  : null,
+                              color: _hasFilter ? null : _white.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(14),
                               border: Border.all(
                                 color: _hasFilter
-                                    ? _coral.withValues(alpha: 0.5)
-                                    : _white.withValues(alpha: 0.18),
+                                    ? Colors.transparent
+                                    : _white.withValues(alpha: 0.15),
                               ),
+                              boxShadow: _hasFilter
+                                  ? [_sh(12, c: _coral, o: 0.4)]
+                                  : null,
                             ),
                             child: Icon(Icons.tune_rounded,
-                                color: _hasFilter ? _coral : _white, size: 20),
+                                color: _white, size: 20),
                           ),
                         ),
                         if (_hasFilter)
                           Positioned(
-                            top: 6, right: 6,
+                            top: 8, right: 8,
                             child: Container(
-                              width: 8, height: 8,
+                              width: 7, height: 7,
                               decoration: const BoxDecoration(
-                                  color: _coral, shape: BoxShape.circle),
+                                  color: _peach, shape: BoxShape.circle),
                             ),
                           ),
                       ]),
@@ -206,8 +203,8 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
               // ── Sort bar ────────────────────────────────────────────────
               SliverToBoxAdapter(
                 child: Container(
-                  color: _bg,
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                  color: AppTheme.mocha900,
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                   child: Row(children: [
                     for (final s in [
                       (_Sort.newest,   'الافتراضي',     Icons.grid_view_rounded),
@@ -216,27 +213,33 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                       GestureDetector(
                         onTap: () => setState(() => _sort = s.$1),
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
+                          duration: const Duration(milliseconds: 200),
                           margin: const EdgeInsets.only(left: 8),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 7),
+                              horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
+                            gradient: _sort == s.$1
+                                ? AppTheme.buttonGradient
+                                : null,
                             color: _sort == s.$1
-                                ? _coral
-                                : _white.withValues(alpha: 0.10),
+                                ? null
+                                : _white.withValues(alpha: 0.07),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: _sort == s.$1
-                                  ? _coral
-                                  : _white.withValues(alpha: 0.2),
+                                  ? Colors.transparent
+                                  : _white.withValues(alpha: 0.15),
                             ),
+                            boxShadow: _sort == s.$1
+                                ? [_sh(10, c: _coral, o: 0.35)]
+                                : null,
                           ),
                           child: Row(mainAxisSize: MainAxisSize.min, children: [
                             Icon(s.$3,
                                 size: 13,
                                 color: _sort == s.$1
                                     ? _white
-                                    : _white.withValues(alpha: 0.55)),
+                                    : _white.withValues(alpha: 0.5)),
                             const SizedBox(width: 5),
                             Text(s.$2,
                                 style: TextStyle(
@@ -244,17 +247,24 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                                     fontWeight: FontWeight.w700,
                                     color: _sort == s.$1
                                         ? _white
-                                        : _white.withValues(alpha: 0.55))),
+                                        : _white.withValues(alpha: 0.5))),
                           ]),
                         ),
                       ),
                     ],
                     const Spacer(),
                     if (filtered.isNotEmpty)
-                      Text('${filtered.length} حزمة',
-                          style: TextStyle(
-                              fontSize: 11,
-                              color: _white.withValues(alpha: 0.45))),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _white.withValues(alpha: 0.07),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text('${filtered.length} حزمة',
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: _white.withValues(alpha: 0.5))),
+                      ),
                   ]),
                 ),
               ),
@@ -263,8 +273,8 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
               if (_hasFilter)
                 SliverToBoxAdapter(
                   child: Container(
-                    color: _bg,
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                    color: AppTheme.mocha900,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                     child: Wrap(spacing: 8, runSpacing: 6, children: [
                       if (_q.isNotEmpty)
                         _FilterPill(
@@ -297,25 +307,25 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: _white.withValues(alpha: 0.1),
+                            color: _white.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text('مسح الكل',
                               style: TextStyle(
                                   fontSize: 11,
-                                  color: _white.withValues(alpha: 0.6))),
+                                  color: _white.withValues(alpha: 0.5))),
                         ),
                       ),
                     ]),
                   ),
                 ),
 
-              // ── White content area ──────────────────────────────────────
+              // ── Content area (rounded top) ──────────────────────────────
               SliverToBoxAdapter(
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: _bg,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                    color: AppTheme.sage100,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                   ),
                   child: const SizedBox(height: 20),
                 ),
@@ -328,9 +338,9 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                   sliver: SliverGrid(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      mainAxisSpacing: 14,
-                      crossAxisSpacing: 14,
-                      childAspectRatio: 0.72,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.70,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (_, __) => const _CardShimmer(),
@@ -365,13 +375,13 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
               // ── Grid ─────────────────────────────────────────────────────
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                   sliver: SliverGrid(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      mainAxisSpacing: 14,
-                      crossAxisSpacing: 14,
-                      childAspectRatio: 0.68,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.66,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (_, i) => _BundleCard(bundle: filtered[i]),
@@ -380,10 +390,11 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                   ),
                 ),
 
-              // ── Footer bg filler ─────────────────────────────────────────
               const SliverToBoxAdapter(
-                child: ColoredBox(color: _bg,
-                    child: SizedBox(height: 20)),
+                child: ColoredBox(
+                  color: AppTheme.sage100,
+                  child: SizedBox(height: 20),
+                ),
               ),
             ],
           ),
@@ -414,7 +425,6 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
               borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
             ),
             child: Column(children: [
-              // Handle
               Container(
                 width: 40, height: 4,
                 margin: const EdgeInsets.symmetric(vertical: 14),
@@ -441,13 +451,11 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                 ]),
               ),
               const Divider(height: 1),
-
               Expanded(
                 child: ListView(
                   controller: ctrl,
                   padding: const EdgeInsets.all(20),
                   children: [
-                    // ── Sort ─────────────────────────────────────────────
                     const Text('ترتيب حسب',
                         style: TextStyle(
                             fontSize: 13,
@@ -465,8 +473,11 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 14, vertical: 9),
                             decoration: BoxDecoration(
+                              gradient: tempSort == s.$1
+                                  ? AppTheme.buttonGradient
+                                  : null,
                               color: tempSort == s.$1
-                                  ? _coral
+                                  ? null
                                   : AppTheme.sage200,
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -488,10 +499,7 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                           ),
                         ),
                     ]),
-
                     const SizedBox(height: 22),
-
-                    // ── Toggle enrolled ──────────────────────────────────
                     if (enrolledCount > 0) ...[
                       const Text('تصفية',
                           style: TextStyle(
@@ -541,8 +549,6 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                   ],
                 ),
               ),
-
-              // Apply
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
@@ -552,9 +558,7 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                       decoration: BoxDecoration(
                         gradient: AppTheme.buttonGradient,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          _sh(12, c: _coral, o: 0.3),
-                        ],
+                        boxShadow: [_sh(12, c: _coral, o: 0.35)],
                       ),
                       child: ElevatedButton(
                         onPressed: () {
@@ -590,7 +594,119 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  Bundle Card — Grid card (2 columns)
+//  Hero Header
+// ══════════════════════════════════════════════════════════════════════════════
+class _HeroHeader extends StatelessWidget {
+  final int count;
+  const _HeroHeader({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppTheme.mocha900, AppTheme.mocha800, AppTheme.mocha700],
+          stops: [0.0, 0.5, 1.0],
+        ),
+      ),
+      child: Stack(children: [
+        // Deco — دائرة كبيرة علوية
+        Positioned(
+          top: -40, right: -30,
+          child: Container(
+            width: 160, height: 160,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _coral.withValues(alpha: 0.06),
+            ),
+          ),
+        ),
+        // Deco — دائرة صغيرة
+        Positioned(
+          top: 20, right: 100,
+          child: Container(
+            width: 60, height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _peach.withValues(alpha: 0.08),
+            ),
+          ),
+        ),
+        // Deco — خط مائل
+        Positioned(
+          bottom: 30, left: -20,
+          child: Container(
+            width: 100, height: 100,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _plum.withValues(alpha: 0.25),
+            ),
+          ),
+        ),
+        // Content
+        SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(children: [
+                  Container(
+                    padding: const EdgeInsets.all(9),
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.buttonGradient,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [_sh(10, c: _coral, o: 0.4)],
+                    ),
+                    child: const Icon(Icons.collections_bookmark_rounded,
+                        color: _white, size: 18),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text('الحزم التعليمية',
+                        style: TextStyle(
+                            color: _white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 22,
+                            letterSpacing: -0.3)),
+                  ),
+                  if (count > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: _coral.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: _coral.withValues(alpha: 0.35)),
+                      ),
+                      child: Text('$count حزمة',
+                          style: TextStyle(
+                              color: _white.withValues(alpha: 0.9),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                ]),
+                const SizedBox(height: 6),
+                Text('اكتشف أفضل المسارات التعليمية',
+                    style: TextStyle(
+                        color: _white.withValues(alpha: 0.45),
+                        fontSize: 12.5)),
+              ],
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  Bundle Card
 // ══════════════════════════════════════════════════════════════════════════════
 class _BundleCard extends StatefulWidget {
   final Bundle bundle;
@@ -615,23 +731,32 @@ class _BundleCardState extends State<_BundleCard> {
       },
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedScale(
-        scale: _pressed ? 0.96 : 1.0,
-        duration: const Duration(milliseconds: 110),
+        scale: _pressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 120),
         curve: Curves.easeOutCubic,
         child: Container(
           decoration: BoxDecoration(
             color: _white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(22),
             border: Border.all(
               color: b.isEnrolled
-                  ? AppTheme.success.withValues(alpha: 0.4)
-                  : AppTheme.sage500.withValues(alpha: 0.5),
+                  ? AppTheme.success.withValues(alpha: 0.35)
+                  : AppTheme.sage400.withValues(alpha: 0.6),
               width: b.isEnrolled ? 1.5 : 1,
             ),
             boxShadow: [
-              _sh(10,
-                  c: b.isEnrolled ? AppTheme.success : _mocha,
-                  o: 0.08),
+              BoxShadow(
+                color: (b.isEnrolled ? AppTheme.success : AppTheme.mocha700)
+                    .withValues(alpha: 0.10),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
+              ),
+              BoxShadow(
+                color: (b.isEnrolled ? AppTheme.success : _coral)
+                    .withValues(alpha: 0.04),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
             ],
           ),
           clipBehavior: Clip.antiAlias,
@@ -650,7 +775,7 @@ class _BundleCardState extends State<_BundleCard> {
                               _GradBg(index: b.id))
                       : _GradBg(index: b.id),
 
-                  // scrim
+                  // Gradient scrim داكن
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -659,46 +784,28 @@ class _BundleCardState extends State<_BundleCard> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withValues(alpha: 0.45),
+                            Colors.black.withValues(alpha: 0.55),
                           ],
-                          stops: const [0.4, 1.0],
+                          stops: const [0.35, 1.0],
                         ),
                       ),
                     ),
                   ),
 
-                  // status badge — أعلى اليسار
-                  Positioned(
-                    top: 8, left: 8,
-                    child: b.isEnrolled
-                        ? _Pill(
-                            label: 'مسجّل',
-                            bg: AppTheme.success,
-                            icon: Icons.check_rounded)
-                        : const SizedBox.shrink(),
-                  ),
-
-                  // course count — أسفل اليمين
-                  Positioned(
-                    bottom: 7, right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        const Icon(Icons.library_books_rounded,
-                            size: 9, color: _white),
-                        const SizedBox(width: 3),
-                        Text('${b.courseCount}',
-                            style: const TextStyle(
-                                color: _white,
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.bold)),
-                      ]),
+                  // Status badge
+                  if (b.isEnrolled)
+                    Positioned(
+                      top: 9, left: 9,
+                      child: _StatusBadge(
+                          label: 'مسجّل',
+                          color: AppTheme.success,
+                          icon: Icons.check_rounded),
                     ),
+
+                  // Course count badge
+                  Positioned(
+                    bottom: 8, right: 9,
+                    child: _CountBadge(count: b.courseCount),
                   ),
                 ]),
               ),
@@ -707,42 +814,40 @@ class _BundleCardState extends State<_BundleCard> {
               Expanded(
                 flex: 4,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 4, 10, 10),
+                  padding: const EdgeInsets.fromLTRB(11, 8, 11, 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title
                       Text(b.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 13.5,
                               fontWeight: FontWeight.w800,
-                              color: _mocha,
+                              color: AppTheme.mocha700,
                               height: 1.3)),
 
                       const Spacer(),
 
-                      // Progress bar (if enrolled)
                       if (b.isEnrolled) ...[
                         _MiniProgress(courses: b.courses),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 7),
                       ],
 
-                      // CTA chip
+                      // CTA
                       b.isEnrolled
-                          ? _ChipBtn(
-                              label: 'ابدأ',
+                          ? _CtaButton(
+                              label: 'ابدأ التعلم',
                               icon: Icons.play_arrow_rounded,
-                              bg: AppTheme.successLight,
-                              fg: AppTheme.success,
-                              gradient: null)
-                          : _ChipBtn(
+                              gradient: null,
+                              solidColor: AppTheme.successLight,
+                              textColor: AppTheme.success)
+                          : _CtaButton(
                               label: 'أدخل كود',
                               icon: Icons.vpn_key_rounded,
-                              bg: null,
-                              fg: _white,
-                              gradient: AppTheme.buttonGradient),
+                              gradient: AppTheme.buttonGradient,
+                              solidColor: null,
+                              textColor: _white),
                     ],
                   ),
                 ),
@@ -753,6 +858,53 @@ class _BundleCardState extends State<_BundleCard> {
       ),
     );
   }
+}
+
+// ── Status Badge ──────────────────────────────────────────────────────────────
+class _StatusBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+  final IconData icon;
+  const _StatusBadge({required this.label, required this.color, required this.icon});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(10),
+      boxShadow: [BoxShadow(color: color.withValues(alpha: 0.45), blurRadius: 8, offset: const Offset(0, 2))],
+    ),
+    child: Row(mainAxisSize: MainAxisSize.min, children: [
+      Icon(icon, size: 10, color: _white),
+      const SizedBox(width: 3),
+      Text(label,
+          style: const TextStyle(
+              color: _white, fontSize: 9.5, fontWeight: FontWeight.bold)),
+    ]),
+  );
+}
+
+// ── Count Badge ───────────────────────────────────────────────────────────────
+class _CountBadge extends StatelessWidget {
+  final int count;
+  const _CountBadge({required this.count});
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: BorderRadius.circular(10),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      color: Colors.black.withValues(alpha: 0.5),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        const Icon(Icons.library_books_rounded, size: 9, color: _white),
+        const SizedBox(width: 3),
+        Text('$count',
+            style: const TextStyle(
+                color: _white, fontSize: 9.5, fontWeight: FontWeight.bold)),
+      ]),
+    ),
+  );
 }
 
 // ── Mini Progress ─────────────────────────────────────────────────────────────
@@ -787,16 +939,16 @@ class _MiniProgress extends StatelessWidget {
   }
 }
 
-// ── Chip Button ───────────────────────────────────────────────────────────────
-class _ChipBtn extends StatelessWidget {
+// ── CTA Button ────────────────────────────────────────────────────────────────
+class _CtaButton extends StatelessWidget {
   final String label;
   final IconData icon;
-  final Color? bg;
-  final Color fg;
   final LinearGradient? gradient;
-  const _ChipBtn({
+  final Color? solidColor;
+  final Color textColor;
+  const _CtaButton({
     required this.label, required this.icon,
-    required this.bg, required this.fg, required this.gradient,
+    required this.gradient, required this.solidColor, required this.textColor,
   });
 
   @override
@@ -805,42 +957,17 @@ class _ChipBtn extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 7),
     decoration: BoxDecoration(
       gradient: gradient,
-      color: bg,
+      color: solidColor,
       borderRadius: BorderRadius.circular(10),
       boxShadow: gradient != null
-          ? [_sh(8, c: _coral, o: 0.25)] : null,
+          ? [_sh(10, c: _coral, o: 0.28)] : null,
     ),
     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Icon(icon, size: 13, color: fg),
+      Icon(icon, size: 13, color: textColor),
       const SizedBox(width: 4),
       Text(label,
           style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.bold, color: fg)),
-    ]),
-  );
-}
-
-// ── Pill Badge ────────────────────────────────────────────────────────────────
-class _Pill extends StatelessWidget {
-  final String label;
-  final Color bg;
-  final IconData icon;
-  const _Pill({required this.label, required this.bg, required this.icon});
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-    decoration: BoxDecoration(
-      color: bg,
-      borderRadius: BorderRadius.circular(10),
-      boxShadow: [_sh(6, c: bg, o: 0.35)],
-    ),
-    child: Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(icon, size: 10, color: _white),
-      const SizedBox(width: 3),
-      Text(label,
-          style: const TextStyle(
-              color: _white, fontSize: 9.5, fontWeight: FontWeight.bold)),
+              fontSize: 11, fontWeight: FontWeight.bold, color: textColor)),
     ]),
   );
 }
@@ -856,9 +983,9 @@ class _FilterPill extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.fromLTRB(10, 5, 6, 5),
     decoration: BoxDecoration(
-      color: _coral.withValues(alpha: 0.18),
+      color: _coral.withValues(alpha: 0.15),
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: _coral.withValues(alpha: 0.4)),
+      border: Border.all(color: _coral.withValues(alpha: 0.35)),
     ),
     child: Row(mainAxisSize: MainAxisSize.min, children: [
       if (icon != null) ...[
@@ -907,7 +1034,7 @@ class _CardShimmer extends StatelessWidget {
     child: Container(
       decoration: BoxDecoration(
           color: _white,
-          borderRadius: BorderRadius.circular(20)),
+          borderRadius: BorderRadius.circular(22)),
     ),
   );
 }
@@ -964,9 +1091,14 @@ class _EmptyView extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: Column(mainAxisSize: MainAxisSize.min, children: [
       Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-            color: _sage.withValues(alpha: 0.25), shape: BoxShape.circle),
+          gradient: LinearGradient(
+            colors: [_plum.withValues(alpha: 0.12), _coral.withValues(alpha: 0.08)],
+            begin: Alignment.topLeft, end: Alignment.bottomRight,
+          ),
+          shape: BoxShape.circle,
+        ),
         child: const Icon(Icons.folder_off_outlined, size: 40, color: _plum)),
       const SizedBox(height: 12),
       Text(hasQuery ? 'لا نتائج لـ "$query"' : 'لا توجد حزم متاحة',
