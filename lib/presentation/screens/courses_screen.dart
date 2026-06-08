@@ -590,7 +590,7 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  Bundle Card — Grid card (2 columns) - WITHOUT BACKGROUND
+//  Bundle Card — نسخة Glassmorphism المثالية (بدون خلفية مع تأثير زجاجي)
 // ══════════════════════════════════════════════════════════════════════════════
 class _BundleCard extends StatefulWidget {
   final Bundle bundle;
@@ -619,9 +619,37 @@ class _BundleCardState extends State<_BundleCard> {
         duration: const Duration(milliseconds: 110),
         curve: Curves.easeOutCubic,
         child: Container(
-          // بدون خلفية - بدون لون، بدون border، بدون ظل
           decoration: BoxDecoration(
+            // ✅ شفاف مع تأثير زجاجي (Glassmorphism)
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(20),
+            
+            // ✅ حدود خفيفة لتمييز البطاقة
+            border: Border.all(
+              color: b.isEnrolled
+                  ? AppTheme.success.withValues(alpha: 0.5)
+                  : _white.withValues(alpha: 0.12),
+              width: 1,
+            ),
+            
+            // ✅ ظل عميق يعطي إحساساً بالعمق
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.18),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+            
+            // ✅ تأثير زجاجي عصري (Glass effect)
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                _white.withValues(alpha: 0.06),
+                _white.withValues(alpha: 0.02),
+              ],
+            ),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -639,7 +667,7 @@ class _BundleCardState extends State<_BundleCard> {
                               _GradBg(index: b.id))
                       : _GradBg(index: b.id),
 
-                  // scrim - تحسين الرؤية للنصوص
+                  // ✅ scrim محسن - تعتيم أقل قليلاً مع تدرج أفضل
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -648,7 +676,7 @@ class _BundleCardState extends State<_BundleCard> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withValues(alpha: 0.65),
+                            Colors.black.withValues(alpha: 0.55), // تعتيم محسن
                           ],
                           stops: const [0.4, 1.0],
                         ),
@@ -656,11 +684,11 @@ class _BundleCardState extends State<_BundleCard> {
                     ),
                   ),
 
-                  // status badge — أعلى اليسار
+                  // status badge — أعلى اليسار (نسخة محسنة)
                   Positioned(
                     top: 8, left: 8,
                     child: b.isEnrolled
-                        ? _Pill(
+                        ? _PillGlass(
                             label: 'مسجّل',
                             bg: AppTheme.success,
                             icon: Icons.check_rounded)
@@ -674,8 +702,11 @@ class _BundleCardState extends State<_BundleCard> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.7),
+                        color: Colors.black.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: _white.withValues(alpha: 0.15),
+                        ),
                       ),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         const Icon(Icons.library_books_rounded,
@@ -700,43 +731,36 @@ class _BundleCardState extends State<_BundleCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // العنوان - بلون أبيض مع ظل للوضوح
+                      // ✅ العنوان - أبيض صريح مع وضوح تام
                       Text(b.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
                               color: _white,
-                              height: 1.3,
-                              shadows: [
-                                Shadow(
-                                  offset: const Offset(0, 1),
-                                  blurRadius: 3,
-                                  color: Colors.black.withValues(alpha: 0.5),
-                                )
-                              ])),
+                              height: 1.3)),
 
                       const Spacer(),
 
                       // شريط التقدم (إذا كان مسجلاً)
                       if (b.isEnrolled) ...[
-                        _MiniProgressDark(courses: b.courses),
+                        _MiniProgressGlass(courses: b.courses),
                         const SizedBox(height: 6),
                       ],
 
-                      // زر الإجراء - بدون خلفية كارت
+                      // ✅ زر الإجراء - نسخة محسنة للخلفية الشفافة
                       b.isEnrolled
-                          ? _ChipBtnDark(
+                          ? _ChipBtnGlass(
                               label: 'ابدأ',
                               icon: Icons.play_arrow_rounded,
-                              bg: AppTheme.success.withValues(alpha: 0.9),
-                              fg: _white)
-                          : _ChipBtnDark(
+                              gradient: null,
+                              color: AppTheme.success.withValues(alpha: 0.9))
+                          : _ChipBtnGlass(
                               label: 'أدخل كود',
                               icon: Icons.vpn_key_rounded,
-                              bg: _coral.withValues(alpha: 0.9),
-                              fg: _white),
+                              gradient: AppTheme.buttonGradient,
+                              color: null),
                     ],
                   ),
                 ),
@@ -749,10 +773,10 @@ class _BundleCardState extends State<_BundleCard> {
   }
 }
 
-// ── Mini Progress للخلفية الداكنة ─────────────────────────────────────────────
-class _MiniProgressDark extends StatelessWidget {
+// ── Mini Progress للخلفية الشفافة (نسخة Glassmorphism) ────────────────────────
+class _MiniProgressGlass extends StatelessWidget {
   final List<BundleCourse> courses;
-  const _MiniProgressDark({required this.courses});
+  const _MiniProgressGlass({required this.courses});
 
   @override
   Widget build(BuildContext context) {
@@ -781,15 +805,18 @@ class _MiniProgressDark extends StatelessWidget {
   }
 }
 
-// ── Chip Button للخلفية الداكنة ───────────────────────────────────────────────
-class _ChipBtnDark extends StatelessWidget {
+// ── Chip Button للخلفية الشفافة (نسخة Glassmorphism محسنة) ────────────────────
+class _ChipBtnGlass extends StatelessWidget {
   final String label;
   final IconData icon;
-  final Color bg;
-  final Color fg;
-  const _ChipBtnDark({
-    required this.label, required this.icon,
-    required this.bg, required this.fg,
+  final LinearGradient? gradient;
+  final Color? color;
+  
+  const _ChipBtnGlass({
+    required this.label, 
+    required this.icon,
+    this.gradient,
+    this.color,
   });
 
   @override
@@ -797,33 +824,48 @@ class _ChipBtnDark extends StatelessWidget {
     width: double.infinity,
     padding: const EdgeInsets.symmetric(vertical: 7),
     decoration: BoxDecoration(
-      color: bg,
+      gradient: gradient,
+      color: gradient == null ? color ?? _white.withValues(alpha: 0.10) : null,
       borderRadius: BorderRadius.circular(10),
+      border: Border.all(
+        color: gradient == null
+            ? _white.withValues(alpha: 0.18)
+            : Colors.transparent,
+      ),
     ),
     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Icon(icon, size: 13, color: fg),
+      Icon(icon, size: 13, color: _white),
       const SizedBox(width: 4),
       Text(label,
-          style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.bold, color: fg)),
+          style: const TextStyle(
+              fontSize: 11, fontWeight: FontWeight.bold, color: _white)),
     ]),
   );
 }
 
-// ── Pill Badge ────────────────────────────────────────────────────────────────
-class _Pill extends StatelessWidget {
+// ── Pill Badge نسخة Glassmorphism محسنة ───────────────────────────────────────
+class _PillGlass extends StatelessWidget {
   final String label;
   final Color bg;
   final IconData icon;
-  const _Pill({required this.label, required this.bg, required this.icon});
+  const _PillGlass({required this.label, required this.bg, required this.icon});
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
     decoration: BoxDecoration(
-      color: bg,
+      color: bg.withValues(alpha: 0.85),
       borderRadius: BorderRadius.circular(10),
-      boxShadow: [_sh(6, c: bg, o: 0.35)],
+      border: Border.all(
+        color: _white.withValues(alpha: 0.15),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: bg.withValues(alpha: 0.3),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
+        ),
+      ],
     ),
     child: Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(icon, size: 10, color: _white),
