@@ -10,11 +10,10 @@ import '../providers/auth_provider.dart';
 import '../providers/bundles_provider.dart';
 
 // ── Palette shortcuts ─────────────────────────────────────────────────────────
-const _bg     = AppTheme.mocha700;   // 472D30 — scaffold bg
+const _bg     = AppTheme.sage100;   // ✅ خلفية فاتحة
 const _plum   = AppTheme.mocha500;   // 723D46
 const _mocha  = AppTheme.mocha700;   // 472D30
 const _coral  = AppTheme.coral500;   // E26D5C
-const _peach  = AppTheme.peach500;   // FFE1A8
 const _sage   = AppTheme.sage500;    // C9CBA3
 const _white  = Colors.white;
 
@@ -87,7 +86,7 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
     final enrolledCount = all.where((b) => b.isEnrolled).length;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: SystemUiOverlayStyle.dark, // ✅ Dark status bar icons for light background
       child: Scaffold(
         backgroundColor: _bg,
         body: RefreshIndicator(
@@ -104,24 +103,24 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                 floating: true,
                 snap: true,
                 backgroundColor: _bg,
-                systemOverlayStyle: SystemUiOverlayStyle.light,
+                systemOverlayStyle: SystemUiOverlayStyle.dark,
                 expandedHeight: 0,
                 title: Row(children: [
                   const Text('الحزم التعليمية',
                       style: TextStyle(
-                          color: _white, fontWeight: FontWeight.w800, fontSize: 18)),
+                          color: _mocha, fontWeight: FontWeight.w800, fontSize: 18)),
                   const Spacer(),
                   if (all.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _white.withValues(alpha: 0.12),
+                        color: _mocha.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: _sage.withValues(alpha: 0.3)),
                       ),
                       child: Text('${all.length} حزمة',
                           style: TextStyle(
-                              color: _white.withValues(alpha: 0.8),
+                              color: _mocha.withValues(alpha: 0.7),
                               fontSize: 11,
                               fontWeight: FontWeight.w600)),
                     ),
@@ -132,28 +131,28 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                     color: _bg,
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                     child: Row(children: [
-                      // Search field
+                      // ✅ Search field - نسخة فاتحة محسنة
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: _white.withValues(alpha: 0.10),
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: _white.withValues(alpha: 0.18)),
+                            border: Border.all(color: _sage.withValues(alpha: 0.6)),
                           ),
                           child: TextField(
                             controller: _searchCtrl,
-                            style: const TextStyle(color: _white, fontSize: 13),
+                            style: const TextStyle(color: _mocha, fontSize: 13),
                             onChanged: (v) => setState(() => _q = v),
                             decoration: InputDecoration(
                               hintText: 'ابحث عن حزمة...',
                               hintStyle: TextStyle(
-                                  color: _white.withValues(alpha: 0.45), fontSize: 13),
+                                  color: _mocha.withValues(alpha: 0.45), fontSize: 13),
                               prefixIcon: Icon(Icons.search_rounded,
-                                  color: _white.withValues(alpha: 0.55), size: 20),
+                                  color: _mocha.withValues(alpha: 0.55), size: 20),
                               suffixIcon: _q.isNotEmpty
                                   ? IconButton(
                                       icon: Icon(Icons.close_rounded,
-                                          color: _white.withValues(alpha: 0.6), size: 18),
+                                          color: _mocha.withValues(alpha: 0.6), size: 18),
                                       onPressed: () {
                                         _searchCtrl.clear();
                                         setState(() => _q = '');
@@ -175,17 +174,17 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                             width: 42, height: 42,
                             decoration: BoxDecoration(
                               color: _hasFilter
-                                  ? _coral.withValues(alpha: 0.25)
-                                  : _white.withValues(alpha: 0.10),
+                                  ? _coral.withValues(alpha: 0.15)
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(13),
                               border: Border.all(
                                 color: _hasFilter
                                     ? _coral.withValues(alpha: 0.5)
-                                    : _white.withValues(alpha: 0.18),
+                                    : _sage.withValues(alpha: 0.6),
                               ),
                             ),
                             child: Icon(Icons.tune_rounded,
-                                color: _hasFilter ? _coral : _white, size: 20),
+                                color: _hasFilter ? _coral : _mocha.withValues(alpha: 0.7), size: 20),
                           ),
                         ),
                         if (_hasFilter)
@@ -223,12 +222,12 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                           decoration: BoxDecoration(
                             color: _sort == s.$1
                                 ? _coral
-                                : _white.withValues(alpha: 0.10),
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: _sort == s.$1
                                   ? _coral
-                                  : _white.withValues(alpha: 0.2),
+                                  : _sage.withValues(alpha: 0.4),
                             ),
                           ),
                           child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -236,7 +235,7 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                                 size: 13,
                                 color: _sort == s.$1
                                     ? _white
-                                    : _white.withValues(alpha: 0.55)),
+                                    : _mocha.withValues(alpha: 0.75)),
                             const SizedBox(width: 5),
                             Text(s.$2,
                                 style: TextStyle(
@@ -244,7 +243,7 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                                     fontWeight: FontWeight.w700,
                                     color: _sort == s.$1
                                         ? _white
-                                        : _white.withValues(alpha: 0.55))),
+                                        : _mocha.withValues(alpha: 0.75))),
                           ]),
                         ),
                       ),
@@ -254,7 +253,7 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                       Text('${filtered.length} حزمة',
                           style: TextStyle(
                               fontSize: 11,
-                              color: _white.withValues(alpha: 0.45))),
+                              color: _mocha.withValues(alpha: 0.55))),
                   ]),
                 ),
               ),
@@ -297,20 +296,20 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: _white.withValues(alpha: 0.1),
+                            color: _mocha.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text('مسح الكل',
                               style: TextStyle(
                                   fontSize: 11,
-                                  color: _white.withValues(alpha: 0.6))),
+                                  color: _mocha.withValues(alpha: 0.6))),
                         ),
                       ),
                     ]),
                   ),
                 ),
 
-              // ── White content area ──────────────────────────────────────
+              // ── Content area spacer ──────────────────────────────────────
               SliverToBoxAdapter(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -590,7 +589,7 @@ class _CoursesScreenState extends ConsumerState<CoursesScreen> {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  Bundle Card — نسخة Glassmorphism المثالية (بدون خلفية مع تأثير زجاجي)
+//  Bundle Card — نسخة داكنة على خلفية فاتحة (Udemy/Netflix style)
 // ══════════════════════════════════════════════════════════════════════════════
 class _BundleCard extends StatefulWidget {
   final Bundle bundle;
@@ -619,37 +618,25 @@ class _BundleCardState extends State<_BundleCard> {
         duration: const Duration(milliseconds: 110),
         curve: Curves.easeOutCubic,
         child: Container(
+          // ✅ بطاقة داكنة (mocha700)
           decoration: BoxDecoration(
-            // ✅ شفاف مع تأثير زجاجي (Glassmorphism)
-            color: Colors.transparent,
+            color: AppTheme.mocha700,
             borderRadius: BorderRadius.circular(20),
             
-            // ✅ حدود خفيفة لتمييز البطاقة
             border: Border.all(
               color: b.isEnrolled
-                  ? AppTheme.success.withValues(alpha: 0.5)
-                  : _white.withValues(alpha: 0.12),
+                  ? AppTheme.success.withValues(alpha: 0.6)
+                  : AppTheme.sage300.withValues(alpha: 0.6),
               width: 1,
             ),
             
-            // ✅ ظل عميق يعطي إحساساً بالعمق
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.18),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
+                color: AppTheme.mocha700.withValues(alpha: 0.35),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
               ),
             ],
-            
-            // ✅ تأثير زجاجي عصري (Glass effect)
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                _white.withValues(alpha: 0.06),
-                _white.withValues(alpha: 0.02),
-              ],
-            ),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -667,7 +654,7 @@ class _BundleCardState extends State<_BundleCard> {
                               _GradBg(index: b.id))
                       : _GradBg(index: b.id),
 
-                  // ✅ scrim محسن - تعتيم أقل قليلاً مع تدرج أفضل
+                  // scrim محسن
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -676,7 +663,7 @@ class _BundleCardState extends State<_BundleCard> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withValues(alpha: 0.55), // تعتيم محسن
+                            Colors.black.withValues(alpha: 0.55),
                           ],
                           stops: const [0.4, 1.0],
                         ),
@@ -684,11 +671,11 @@ class _BundleCardState extends State<_BundleCard> {
                     ),
                   ),
 
-                  // status badge — أعلى اليسار (نسخة محسنة)
+                  // status badge — أعلى اليسار
                   Positioned(
                     top: 8, left: 8,
                     child: b.isEnrolled
-                        ? _PillGlass(
+                        ? _PillDark(
                             label: 'مسجّل',
                             bg: AppTheme.success,
                             icon: Icons.check_rounded)
@@ -731,36 +718,38 @@ class _BundleCardState extends State<_BundleCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ✅ العنوان - أبيض صريح مع وضوح تام
+                      // ✅ العنوان - أبيض صريح
                       Text(b.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
-                              color: _white,
+                              color: Colors.white,
                               height: 1.3)),
 
                       const Spacer(),
 
-                      // شريط التقدم (إذا كان مسجلاً)
+                      // ✅ شريط التقدم (إذا كان مسجلاً)
                       if (b.isEnrolled) ...[
-                        _MiniProgressGlass(courses: b.courses),
+                        _MiniProgressDark(courses: b.courses),
                         const SizedBox(height: 6),
                       ],
 
-                      // ✅ زر الإجراء - نسخة محسنة للخلفية الشفافة
+                      // ✅ زر الإجراء - نسخة محسنة
                       b.isEnrolled
-                          ? _ChipBtnGlass(
+                          ? _ChipBtnDark(
                               label: 'ابدأ',
                               icon: Icons.play_arrow_rounded,
-                              gradient: null,
-                              color: AppTheme.success.withValues(alpha: 0.9))
-                          : _ChipBtnGlass(
+                              bg: AppTheme.success,
+                              fg: Colors.white,
+                              gradient: null)
+                          : _ChipBtnDark(
                               label: 'أدخل كود',
                               icon: Icons.vpn_key_rounded,
-                              gradient: AppTheme.buttonGradient,
-                              color: null),
+                              bg: AppTheme.coral500.withValues(alpha: 0.9),
+                              fg: Colors.white,
+                              gradient: null),
                     ],
                   ),
                 ),
@@ -773,10 +762,10 @@ class _BundleCardState extends State<_BundleCard> {
   }
 }
 
-// ── Mini Progress للخلفية الشفافة (نسخة Glassmorphism) ────────────────────────
-class _MiniProgressGlass extends StatelessWidget {
+// ── Mini Progress للخلفية الداكنة ─────────────────────────────────────────────
+class _MiniProgressDark extends StatelessWidget {
   final List<BundleCourse> courses;
-  const _MiniProgressGlass({required this.courses});
+  const _MiniProgressDark({required this.courses});
 
   @override
   Widget build(BuildContext context) {
@@ -790,7 +779,7 @@ class _MiniProgressGlass extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: pct, minHeight: 4,
-              backgroundColor: _white.withValues(alpha: 0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor: const AlwaysStoppedAnimation(AppTheme.success)),
           ),
         ),
@@ -799,24 +788,26 @@ class _MiniProgressGlass extends StatelessWidget {
             style: const TextStyle(
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.success)),
+                color: AppTheme.sage200)),
       ]),
     ]);
   }
 }
 
-// ── Chip Button للخلفية الشفافة (نسخة Glassmorphism محسنة) ────────────────────
-class _ChipBtnGlass extends StatelessWidget {
+// ── Chip Button للخلفية الداكنة ───────────────────────────────────────────────
+class _ChipBtnDark extends StatelessWidget {
   final String label;
   final IconData icon;
+  final Color bg;
+  final Color fg;
   final LinearGradient? gradient;
-  final Color? color;
   
-  const _ChipBtnGlass({
+  const _ChipBtnDark({
     required this.label, 
     required this.icon,
+    required this.bg, 
+    required this.fg,
     this.gradient,
-    this.color,
   });
 
   @override
@@ -825,30 +816,25 @@ class _ChipBtnGlass extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 7),
     decoration: BoxDecoration(
       gradient: gradient,
-      color: gradient == null ? color ?? _white.withValues(alpha: 0.10) : null,
+      color: gradient == null ? bg : null,
       borderRadius: BorderRadius.circular(10),
-      border: Border.all(
-        color: gradient == null
-            ? _white.withValues(alpha: 0.18)
-            : Colors.transparent,
-      ),
     ),
     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Icon(icon, size: 13, color: _white),
+      Icon(icon, size: 13, color: fg),
       const SizedBox(width: 4),
       Text(label,
-          style: const TextStyle(
-              fontSize: 11, fontWeight: FontWeight.bold, color: _white)),
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.bold, color: fg)),
     ]),
   );
 }
 
-// ── Pill Badge نسخة Glassmorphism محسنة ───────────────────────────────────────
-class _PillGlass extends StatelessWidget {
+// ── Pill Badge للخلفية الداكنة ────────────────────────────────────────────────
+class _PillDark extends StatelessWidget {
   final String label;
   final Color bg;
   final IconData icon;
-  const _PillGlass({required this.label, required this.bg, required this.icon});
+  const _PillDark({required this.label, required this.bg, required this.icon});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -857,7 +843,7 @@ class _PillGlass extends StatelessWidget {
       color: bg.withValues(alpha: 0.85),
       borderRadius: BorderRadius.circular(10),
       border: Border.all(
-        color: _white.withValues(alpha: 0.15),
+        color: Colors.white.withValues(alpha: 0.15),
       ),
       boxShadow: [
         BoxShadow(
@@ -868,16 +854,16 @@ class _PillGlass extends StatelessWidget {
       ],
     ),
     child: Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(icon, size: 10, color: _white),
+      Icon(icon, size: 10, color: Colors.white),
       const SizedBox(width: 3),
       Text(label,
           style: const TextStyle(
-              color: _white, fontSize: 9.5, fontWeight: FontWeight.bold)),
+              color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.bold)),
     ]),
   );
 }
 
-// ── Filter Pill ───────────────────────────────────────────────────────────────
+// ── Filter Pill محسن ──────────────────────────────────────────────────────────
 class _FilterPill extends StatelessWidget {
   final String label;
   final IconData? icon;
@@ -888,22 +874,22 @@ class _FilterPill extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.fromLTRB(10, 5, 6, 5),
     decoration: BoxDecoration(
-      color: _coral.withValues(alpha: 0.18),
+      color: AppTheme.coral500.withValues(alpha: 0.12),
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: _coral.withValues(alpha: 0.4)),
+      border: Border.all(color: AppTheme.coral500.withValues(alpha: 0.35)),
     ),
     child: Row(mainAxisSize: MainAxisSize.min, children: [
       if (icon != null) ...[
-        Icon(icon, size: 12, color: _coral),
+        Icon(icon, size: 12, color: AppTheme.coral500),
         const SizedBox(width: 4),
       ],
       Text(label,
           style: const TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w600, color: _coral)),
+              fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.coral500)),
       const SizedBox(width: 6),
       GestureDetector(
         onTap: onDelete,
-        child: const Icon(Icons.close_rounded, size: 13, color: _coral),
+        child: Icon(Icons.close_rounded, size: 13, color: AppTheme.coral500),
       ),
     ]),
   );
@@ -938,7 +924,7 @@ class _CardShimmer extends StatelessWidget {
     highlightColor: AppTheme.sage100,
     child: Container(
       decoration: BoxDecoration(
-          color: _white,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20)),
     ),
   );
