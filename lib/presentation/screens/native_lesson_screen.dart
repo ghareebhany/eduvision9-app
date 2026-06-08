@@ -54,7 +54,6 @@ class NativeLessonScreen extends ConsumerStatefulWidget {
 class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
   late Lesson _current;
   bool _completionFired = false;
-  bool _isFullscreen    = false;  // يُحدَّث من _PlayerArea عبر onFullscreenChanged
 
   @override
   void initState() {
@@ -110,30 +109,7 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
     final idx         = lessons.indexWhere((l) => l.id == _current.id);
     final hasPrev     = idx > 0;
     final hasNext     = idx >= 0 && idx + 1 < lessons.length;
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-
-    // في Fullscreen أو Landscape: المشغّل يملأ الشاشة كاملاً
-    if (_isFullscreen || isLandscape) {
-      return SecureScreen(
-        child: Scaffold(
-          backgroundColor: Colors.black,
-          // extendBodyBehindAppBar + resizeToAvoidBottomInset = false
-          // يضمن أن الـ body يملأ الشاشة كاملاً بما فيها status bar
-          extendBodyBehindAppBar: true,
-          resizeToAvoidBottomInset: false,
-          body: SizedBox.expand(
-            child: _PlayerArea(
-              key: ValueKey(_current.id),
-              lesson: _current,
-              onCompleted: _handleCompletion,
-              onFullscreenChanged: (v) => setState(() => _isFullscreen = v),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // في Portrait: التخطيط الاعتيادي
+    // التخطيط الاعتيادي — الـ fullscreen تتولاه HTML بـ position:fixed
     return SecureScreen(
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -146,7 +122,6 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
               key: ValueKey(_current.id),
               lesson: _current,
               onCompleted: _handleCompletion,
-              onFullscreenChanged: (v) => setState(() => _isFullscreen = v),
             ),
 
             // -- محتوى نصي (إن وجد وليس فيديو) ---------------------------
@@ -340,13 +315,11 @@ class _NativeLessonScreenState extends ConsumerState<NativeLessonScreen> {
 class _PlayerArea extends StatefulWidget {
   final Lesson lesson;
   final VoidCallback onCompleted;
-  final ValueChanged<bool> onFullscreenChanged;
 
   const _PlayerArea({
     super.key,
     required this.lesson,
     required this.onCompleted,
-    required this.onFullscreenChanged,
   });
 
   @override
@@ -356,7 +329,6 @@ class _PlayerArea extends StatefulWidget {
 class _PlayerAreaState extends State<_PlayerArea> {
   WebViewController? _ctrl;
   bool _loading = true;
-  bool _isFullscreen = false;
   String? _error;
 
   @override
@@ -444,11 +416,11 @@ class _PlayerAreaState extends State<_PlayerArea> {
 
       // -- Fullscreen: WebView يطلب من Flutter يتولى الدوران ------
       case 'fullscreen:enter':
-        if (!_isFullscreen) _toggleFullscreen();
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
         break;
 
       case 'fullscreen:exit':
-        if (_isFullscreen) _toggleFullscreen();
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
         break;
 
       default:
@@ -464,28 +436,17 @@ class _PlayerAreaState extends State<_PlayerArea> {
 
   @override
   void dispose() {
-    // إعادة الشاشة للوضع العمودي عند الخروج
-    if (_isFullscreen) {
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    }
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-    final fillScreen  = _isFullscreen || isLandscape;
-
+    // الـ fullscreen تتولاه HTML بـ position:fixed — هنا دائماً نسبة 16:9
     return LayoutBuilder(
       builder: (context, constraints) {
-        // LayoutBuilder يُعطي المساحة المتاحة الفعلية — لا MediaQuery.size
-        // في fullscreen: parent هو SizedBox.expand → constraints = شاشة كاملة
-        // في portrait:   parent هو Column → constraints.maxWidth فقط
         final w = constraints.maxWidth;
-        final h = fillScreen
-            ? constraints.maxHeight   // ← المساحة المتاحة فعلاً
-            : w * 9 / 16;
+        final h = w * 9 / 16;
 
         return SizedBox(
           width:  w,
@@ -549,22 +510,4 @@ class _PlayerAreaState extends State<_PlayerArea> {
     );  // LayoutBuilder
   }
 
-  void _toggleFullscreen() {
-    if (_isFullscreen) {
-      // خروج من fullscreen
-      setState(() => _isFullscreen = false);
-      widget.onFullscreenChanged(false);
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    } else {
-      // دخول fullscreen
-      setState(() => _isFullscreen = true);
-      widget.onFullscreenChanged(true);
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    }
-  }
 }
